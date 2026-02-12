@@ -1,0 +1,922 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema de Asistencias</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: #f5f5f5;
+            padding: 10px;
+            padding-bottom: 80px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .header {
+            background: #2563eb;
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .header h1 {
+            font-size: 24px;
+            margin-bottom: 10px;
+        }
+
+        .quincena-selector {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .quincena-btn {
+            flex: 1;
+            padding: 12px;
+            border: 2px solid white;
+            background: transparent;
+            color: white;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .quincena-btn.active {
+            background: white;
+            color: #2563eb;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .tab-btn {
+            flex: 1;
+            padding: 15px;
+            border: none;
+            background: white;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            transition: all 0.3s;
+        }
+
+        .tab-btn.active {
+            background: #2563eb;
+            color: white;
+        }
+
+        .section {
+            display: none;
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .section.active {
+            display: block;
+        }
+
+        .empleado-form {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .empleado-form input {
+            flex: 1;
+            padding: 12px;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            font-size: 16px;
+        }
+
+        .search-box {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            font-size: 16px;
+            margin-bottom: 20px;
+        }
+
+        .search-box:focus {
+            outline: none;
+            border-color: #2563eb;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-primary {
+            background: #2563eb;
+            color: white;
+        }
+
+        .btn-primary:active {
+            background: #1d4ed8;
+        }
+
+        .btn-success {
+            background: #10b981;
+            color: white;
+        }
+
+        .btn-danger {
+            background: #ef4444;
+            color: white;
+            padding: 8px 16px;
+            font-size: 14px;
+        }
+
+        .empleados-list {
+            list-style: none;
+        }
+
+        .empleado-item {
+            display: grid;
+            grid-template-columns: 2fr 2fr 1fr;
+            gap: 10px;
+            align-items: center;
+            padding: 15px;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        .empleado-item:last-child {
+            border-bottom: none;
+        }
+
+        .empleado-nombre {
+            font-weight: 500;
+        }
+
+        .asistencia-select {
+            padding: 10px;
+            border: 2px solid #e5e7eb;
+            border-radius: 6px;
+            font-size: 14px;
+            background: white;
+            cursor: pointer;
+        }
+
+        .asistencia-select:focus {
+            outline: none;
+            border-color: #2563eb;
+        }
+
+        .asistencia-select.registrado {
+            border-color: #10b981;
+            background: #f0fdf4;
+        }
+
+        .asistencia-grid {
+            overflow-x: auto;
+        }
+
+        .asistencia-table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 600px;
+        }
+
+        .asistencia-table th {
+            background: #f3f4f6;
+            padding: 12px 8px;
+            text-align: left;
+            font-size: 14px;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        .asistencia-table td {
+            padding: 10px 8px;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .stat-card {
+            background: #f3f4f6;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .stat-card .label {
+            font-size: 12px;
+            color: #6b7280;
+            margin-bottom: 5px;
+        }
+
+        .stat-card .value {
+            font-size: 24px;
+            font-weight: 700;
+            color: #2563eb;
+        }
+
+        .resumen-grid {
+            margin-top: 20px;
+        }
+
+        .resumen-item {
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr 1fr;
+            gap: 10px;
+            padding: 12px;
+            border-bottom: 1px solid #e5e7eb;
+            align-items: center;
+        }
+
+        .resumen-item.header {
+            background: #f3f4f6;
+            font-weight: 600;
+            position: sticky;
+            top: 0;
+        }
+
+        .export-section {
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 2px solid #e5e7eb;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: #6b7280;
+        }
+
+        .empty-state-icon {
+            font-size: 48px;
+            margin-bottom: 10px;
+        }
+
+        @media (max-width: 600px) {
+            .empleado-item {
+                grid-template-columns: 1fr;
+                gap: 10px;
+            }
+
+            .resumen-item {
+                grid-template-columns: 1fr;
+                gap: 5px;
+            }
+
+            .resumen-item .label-mobile {
+                display: inline;
+                font-weight: 600;
+                margin-right: 5px;
+            }
+        }
+
+        .label-mobile {
+            display: none;
+        }
+
+        .current-date {
+            font-size: 14px;
+            opacity: 0.9;
+            margin-top: 5px;
+        }
+
+        .quick-marks {
+            display: flex;
+            gap: 5px;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+        }
+
+        .quick-mark-btn {
+            padding: 8px 12px;
+            border: 2px solid #e5e7eb;
+            background: white;
+            border-radius: 6px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .quick-mark-btn:active {
+            background: #f3f4f6;
+        }
+
+        .info-text {
+            font-size: 13px;
+            color: #6b7280;
+            margin-bottom: 15px;
+            padding: 10px;
+            background: #f9fafb;
+            border-radius: 6px;
+        }
+
+        .dia-actual-badge {
+            display: inline-block;
+            background: #10b981;
+            color: white;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 13px;
+            font-weight: 600;
+            margin-bottom: 15px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📋 Sistema de Asistencias</h1>
+            <div class="current-date" id="currentDate"></div>
+            <div class="quincena-selector">
+                <button class="quincena-btn active" onclick="cambiarQuincena(1)">1ra Quincena (1-15)</button>
+                <button class="quincena-btn" onclick="cambiarQuincena(2)">2da Quincena (16-31)</button>
+            </div>
+        </div>
+
+        <div class="tabs">
+            <button class="tab-btn active" onclick="cambiarTab('empleados')">👥 Registro Hoy</button>
+            <button class="tab-btn" onclick="cambiarTab('asistencias')">📅 Historial</button>
+            <button class="tab-btn" onclick="cambiarTab('resumen')">📊 Resumen</button>
+        </div>
+
+        <!-- Sección Empleados -->
+        <div id="empleados-section" class="section active">
+            <h2 style="margin-bottom: 15px;">Registro del Día</h2>
+            <div class="dia-actual-badge" id="diaActualBadge"></div>
+
+            <div class="empleado-form">
+                <input type="text" id="nombreEmpleado" placeholder="Nombre del empleado" />
+                <button class="btn btn-primary" onclick="agregarEmpleado()">+ Agregar</button>
+            </div>
+
+            <input type="text" class="search-box" id="searchBox" placeholder="🔍 Buscar empleado..." onkeyup="filtrarEmpleados()" />
+
+            <ul class="empleados-list" id="empleadosList"></ul>
+        </div>
+
+        <!-- Sección Asistencias -->
+        <div id="asistencias-section" class="section">
+            <h2 style="margin-bottom: 15px;">Historial de Asistencias</h2>
+            
+            <div class="info-text">
+                <strong>Editar registros:</strong> Selecciona una marca diferente para modificar el registro de cualquier día.
+            </div>
+
+            <input type="text" class="search-box" id="searchBoxHistorial" placeholder="🔍 Buscar empleado..." onkeyup="renderAsistencias()" />
+
+            <div class="asistencia-grid">
+                <table class="asistencia-table" id="asistenciasTable"></table>
+            </div>
+        </div>
+
+        <!-- Sección Resumen -->
+        <div id="resumen-section" class="section">
+            <h2 style="margin-bottom: 20px;">Resumen de Quincena</h2>
+            
+            <div class="stats">
+                <div class="stat-card">
+                    <div class="label">Total Empleados</div>
+                    <div class="value" id="totalEmpleados">0</div>
+                </div>
+                <div class="stat-card">
+                    <div class="label">Días Normales</div>
+                    <div class="value" id="totalDiasNormales">0</div>
+                </div>
+                <div class="stat-card">
+                    <div class="label">Extras</div>
+                    <div class="value" id="totalExtras">0</div>
+                </div>
+            </div>
+
+            <div class="resumen-grid" id="resumenGrid"></div>
+
+            <div class="export-section">
+                <button class="btn btn-success" onclick="exportarExcel()" style="width: 100%; margin-bottom: 10px;">
+                    📥 Exportar a Excel
+                </button>
+                <button class="btn" onclick="moverDiasAlSiguienteMes()" style="width: 100%; margin-bottom: 10px; background: #3b82f6; color: white;">
+                    📅 Mover Días al Siguiente Mes
+                </button>
+                <button class="btn btn-danger" onclick="limpiarMesAnterior()" style="width: 100%; background: #f59e0b;">
+                    🗑️ Limpiar Registros del Mes Anterior
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let empleados = [];
+        let asistencias = {};
+        let quincenaActual = 1;
+        let tabActual = 'empleados';
+        let diaActual = 0;
+
+        // Opciones del menú desplegable
+        const opcionesAsistencia = [
+            { value: '', label: '-- Sin marcar --' },
+            { value: 'P', label: 'P - Presente' },
+            { value: 'A', label: 'A - Ausente' },
+            { value: 'P + 1+', label: 'P + 1+ (Presente + 1 extra)' },
+            { value: 'P + 2+', label: 'P + 2+ (Presente + 2 extras)' },
+            { value: 'P + 3+', label: 'P + 3+ (Presente + 3 extras)' },
+            { value: 'P + 1++', label: 'P + 1++ (Presente + doble)' },
+            { value: 'P + 2++', label: 'P + 2++ (Presente + 2 dobles)' },
+            { value: '1+', label: '1+ (Solo 1 extra)' },
+            { value: '2+', label: '2+ (Solo 2 extras)' },
+            { value: '3+', label: '3+ (Solo 3 extras)' },
+            { value: '1++', label: '1++ (Solo doble)' },
+            { value: '2++', label: '2++ (Solo 2 dobles)' }
+        ];
+
+        // Inicializar
+        function init() {
+            cargarDatos();
+            calcularDiaActual();
+            actualizarFecha();
+            renderEmpleados();
+            renderAsistencias();
+            renderResumen();
+        }
+
+        function calcularDiaActual() {
+            const hoy = new Date();
+            diaActual = hoy.getDate();
+            
+            // Determinar automáticamente la quincena según el día
+            if (diaActual <= 15) {
+                quincenaActual = 1;
+            } else {
+                quincenaActual = 2;
+            }
+            
+            // Actualizar botones de quincena
+            document.querySelectorAll('.quincena-btn').forEach((btn, idx) => {
+                if (idx + 1 === quincenaActual) {
+                    btn.classList.add('active');
+                } else {
+                    btn.classList.remove('active');
+                }
+            });
+        }
+
+        function actualizarFecha() {
+            const hoy = new Date();
+            const opciones = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+            document.getElementById('currentDate').textContent = hoy.toLocaleDateString('es-ES', opciones);
+            document.getElementById('diaActualBadge').textContent = `Registrando día ${diaActual}`;
+        }
+
+        function cargarDatos() {
+            const datosGuardados = localStorage.getItem('asistenciasData');
+            if (datosGuardados) {
+                const datos = JSON.parse(datosGuardados);
+                empleados = datos.empleados || [];
+                asistencias = datos.asistencias || {};
+            }
+        }
+
+        function guardarDatos() {
+            localStorage.setItem('asistenciasData', JSON.stringify({
+                empleados,
+                asistencias
+            }));
+        }
+
+        function cambiarTab(tab) {
+            tabActual = tab;
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            document.querySelectorAll('.section').forEach(section => section.classList.remove('active'));
+            
+            event.target.classList.add('active');
+            document.getElementById(`${tab}-section`).classList.add('active');
+
+            if (tab === 'empleados') renderEmpleados();
+            if (tab === 'asistencias') renderAsistencias();
+            if (tab === 'resumen') renderResumen();
+        }
+
+        function cambiarQuincena(numero) {
+            quincenaActual = numero;
+            document.querySelectorAll('.quincena-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+            
+            calcularDiaActual(); // Recalcular día actual
+            if (tabActual === 'empleados') renderEmpleados();
+            if (tabActual === 'asistencias') renderAsistencias();
+            if (tabActual === 'resumen') renderResumen();
+        }
+
+        function agregarEmpleado() {
+            const nombre = document.getElementById('nombreEmpleado').value.trim();
+            if (!nombre) {
+                alert('Por favor ingresa un nombre');
+                return;
+            }
+
+            empleados.push({ id: Date.now(), nombre });
+            empleados.sort((a, b) => a.nombre.localeCompare(b.nombre)); // Ordenar alfabéticamente
+            document.getElementById('nombreEmpleado').value = '';
+            guardarDatos();
+            renderEmpleados();
+        }
+
+        function eliminarEmpleado(id) {
+            if (!confirm('¿Estás seguro de eliminar este empleado?')) return;
+            
+            empleados = empleados.filter(e => e.id !== id);
+            delete asistencias[id];
+            guardarDatos();
+            renderEmpleados();
+            renderAsistencias();
+        }
+
+        function crearSelectAsistencia(empId, dia) {
+            const key = `${empId}-${quincenaActual}-${dia}`;
+            const valorActual = asistencias[key] || '';
+            
+            let select = '<select class="asistencia-select';
+            if (valorActual) select += ' registrado';
+            select += `" onchange="guardarAsistencia(${empId}, ${dia}, this.value)">`;
+            
+            opcionesAsistencia.forEach(opcion => {
+                const selected = opcion.value === valorActual ? 'selected' : '';
+                select += `<option value="${opcion.value}" ${selected}>${opcion.label}</option>`;
+            });
+            
+            select += '</select>';
+            return select;
+        }
+
+        function renderEmpleados() {
+            const lista = document.getElementById('empleadosList');
+            const searchTerm = document.getElementById('searchBox').value.toLowerCase();
+            
+            if (empleados.length === 0) {
+                lista.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-state-icon">👥</div>
+                        <p>No hay empleados registrados</p>
+                        <p style="font-size: 14px; margin-top: 10px;">Agrega empleados para comenzar</p>
+                    </div>
+                `;
+                return;
+            }
+
+            const empleadosFiltrados = empleados.filter(emp => 
+                emp.nombre.toLowerCase().includes(searchTerm)
+            );
+
+            if (empleadosFiltrados.length === 0) {
+                lista.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-state-icon">🔍</div>
+                        <p>No se encontraron empleados</p>
+                    </div>
+                `;
+                return;
+            }
+
+            lista.innerHTML = empleadosFiltrados.map(emp => `
+                <li class="empleado-item">
+                    <div class="empleado-nombre">${emp.nombre}</div>
+                    ${crearSelectAsistencia(emp.id, diaActual)}
+                    <button class="btn btn-danger" onclick="eliminarEmpleado(${emp.id})">Eliminar</button>
+                </li>
+            `).join('');
+        }
+
+        function filtrarEmpleados() {
+            renderEmpleados();
+        }
+
+        function getDiasQuincena() {
+            const hoy = new Date();
+            const mes = hoy.getMonth();
+            const anio = hoy.getFullYear();
+            
+            if (quincenaActual === 1) {
+                return Array.from({length: 15}, (_, i) => i + 1);
+            } else {
+                const ultimoDia = new Date(anio, mes + 1, 0).getDate();
+                return Array.from({length: ultimoDia - 15}, (_, i) => i + 16);
+            }
+        }
+
+        function renderAsistencias() {
+            const tabla = document.getElementById('asistenciasTable');
+            const dias = getDiasQuincena();
+            const searchTerm = document.getElementById('searchBoxHistorial').value.toLowerCase();
+
+            if (empleados.length === 0) {
+                tabla.innerHTML = `
+                    <tr><td colspan="100" style="text-align: center; padding: 40px;">
+                        <div class="empty-state-icon">👥</div>
+                        <p>Agrega empleados primero en la pestaña "Registro Hoy"</p>
+                    </td></tr>
+                `;
+                return;
+            }
+
+            const empleadosFiltrados = empleados.filter(emp => 
+                emp.nombre.toLowerCase().includes(searchTerm)
+            );
+
+            if (empleadosFiltrados.length === 0) {
+                tabla.innerHTML = `
+                    <tr><td colspan="100" style="text-align: center; padding: 40px;">
+                        <div class="empty-state-icon">🔍</div>
+                        <p>No se encontraron empleados</p>
+                    </td></tr>
+                `;
+                return;
+            }
+
+            let html = '<thead><tr><th>Empleado</th>';
+            dias.forEach(dia => {
+                const esHoy = dia === diaActual;
+                html += `<th style="${esHoy ? 'background: #dbeafe; font-weight: bold;' : ''}">Día ${dia}${esHoy ? ' ✓' : ''}</th>`;
+            });
+            html += '</tr></thead><tbody>';
+
+            empleadosFiltrados.forEach(emp => {
+                html += `<tr><td><strong>${emp.nombre}</strong></td>`;
+                dias.forEach(dia => {
+                    html += `<td>${crearSelectAsistencia(emp.id, dia)}</td>`;
+                });
+                html += '</tr>';
+            });
+
+            html += '</tbody>';
+            tabla.innerHTML = html;
+        }
+
+        function guardarAsistencia(empId, dia, valor) {
+            const key = `${empId}-${quincenaActual}-${dia}`;
+            asistencias[key] = valor;
+            guardarDatos();
+            
+            // Actualizar visualmente el select
+            event.target.className = valor ? 'asistencia-select registrado' : 'asistencia-select';
+        }
+
+        function calcularTotales(empId, incluirExtrasDelMes = false) {
+            const dias = getDiasQuincena();
+            let diasNormales = 0;
+            let extras = 0;
+
+            dias.forEach(dia => {
+                const key = `${empId}-${quincenaActual}-${dia}`;
+                const valor = asistencias[key] || '';
+
+                // Contar días normales (si contiene P)
+                if (valor.includes('P')) {
+                    diasNormales++;
+                }
+
+                // Contar extras
+                if (valor.includes('+')) {
+                    // Buscar todos los números seguidos de +
+                    const matches = valor.match(/(\d+)\+/g);
+                    if (matches) {
+                        matches.forEach(match => {
+                            const num = parseInt(match.match(/\d+/)[0]);
+                            // Si tiene ++ es doble
+                            if (valor.includes('++')) {
+                                extras += num * 2;
+                            } else {
+                                extras += num;
+                            }
+                        });
+                    }
+                }
+            });
+
+            // Si estamos en 2da quincena y queremos incluir extras del mes completo
+            if (incluirExtrasDelMes && quincenaActual === 2) {
+                // Calcular extras de la 1ra quincena también
+                const diasPrimeraQuincena = Array.from({length: 15}, (_, i) => i + 1);
+                diasPrimeraQuincena.forEach(dia => {
+                    const key = `${empId}-1-${dia}`;
+                    const valor = asistencias[key] || '';
+
+                    if (valor.includes('+')) {
+                        const matches = valor.match(/(\d+)\+/g);
+                        if (matches) {
+                            matches.forEach(match => {
+                                const num = parseInt(match.match(/\d+/)[0]);
+                                if (valor.includes('++')) {
+                                    extras += num * 2;
+                                } else {
+                                    extras += num;
+                                }
+                            });
+                        }
+                    }
+                });
+            }
+
+            return { diasNormales, extras, total: diasNormales + extras };
+        }
+
+        function renderResumen() {
+            const grid = document.getElementById('resumenGrid');
+            
+            if (empleados.length === 0) {
+                grid.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-state-icon">📊</div>
+                        <p>No hay datos para mostrar</p>
+                    </div>
+                `;
+                return;
+            }
+
+            let html = `
+                <div class="resumen-item header">
+                    <div>Empleado</div>
+                    <div>Días Normales</div>
+                    <div>Extras</div>
+                    <div>Total</div>
+                </div>
+            `;
+
+            let totalDias = 0;
+            let totalExtrasAcum = 0;
+
+            empleados.forEach(emp => {
+                const { diasNormales, extras, total } = calcularTotales(emp.id);
+                totalDias += diasNormales;
+                totalExtrasAcum += extras;
+
+                html += `
+                    <div class="resumen-item">
+                        <div><span class="label-mobile">Empleado:</span> ${emp.nombre}</div>
+                        <div><span class="label-mobile">Días:</span> ${diasNormales}</div>
+                        <div><span class="label-mobile">Extras:</span> ${extras}</div>
+                        <div><span class="label-mobile">Total:</span> <strong>${total}</strong></div>
+                    </div>
+                `;
+            });
+
+            grid.innerHTML = html;
+
+            // Actualizar estadísticas
+            document.getElementById('totalEmpleados').textContent = empleados.length;
+            document.getElementById('totalDiasNormales').textContent = totalDias;
+            document.getElementById('totalExtras').textContent = totalExtrasAcum;
+        }
+
+        function exportarExcel() {
+            if (empleados.length === 0) {
+                alert('No hay datos para exportar');
+                return;
+            }
+
+            let csv = 'Nombre,Días Normales,Extras,Total\n';
+
+            empleados.forEach(emp => {
+                let diasNormales, extras, total;
+                
+                if (quincenaActual === 1) {
+                    // 1ra quincena: solo días normales, SIN extras
+                    const totales = calcularTotales(emp.id, false);
+                    diasNormales = totales.diasNormales;
+                    extras = 0; // No se pagan extras en 1ra quincena
+                    total = diasNormales;
+                } else {
+                    // 2da quincena: días normales + TODOS los extras del mes
+                    const totales = calcularTotales(emp.id, true);
+                    diasNormales = totales.diasNormales;
+                    extras = totales.extras; // Incluye extras de ambas quincenas
+                    total = diasNormales + extras;
+                }
+                
+                csv += `"${emp.nombre}",${diasNormales},${extras},${total}\n`;
+            });
+
+            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            const url = URL.createObjectURL(blob);
+            
+            const hoy = new Date();
+            const nombreArchivo = `asistencias_quincena${quincenaActual}_${hoy.getDate()}-${hoy.getMonth()+1}-${hoy.getFullYear()}.csv`;
+            
+            link.setAttribute('href', url);
+            link.setAttribute('download', nombreArchivo);
+            link.style.visibility = 'hidden';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        function limpiarMesAnterior() {
+            if (!confirm('⚠️ ATENCIÓN: Esto eliminará TODOS los registros de asistencias del mes anterior.\n\n¿Estás seguro de continuar?\n\nAsegúrate de haber exportado los datos antes de limpiar.')) {
+                return;
+            }
+
+            if (!confirm('Segunda confirmación: ¿Realmente deseas eliminar todos los registros? Esta acción NO se puede deshacer.')) {
+                return;
+            }
+
+            // Limpiar todas las asistencias
+            asistencias = {};
+            guardarDatos();
+            
+            // Actualizar vistas
+            renderAsistencias();
+            renderResumen();
+            
+            alert('✅ Registros del mes anterior eliminados correctamente.');
+        }
+
+        function moverDiasAlSiguienteMes() {
+            const hoy = new Date();
+            const mes = hoy.getMonth();
+            const anio = hoy.getFullYear();
+            const ultimoDiaMes = new Date(anio, mes + 1, 0).getDate();
+
+            // Pedir al usuario desde qué día quiere mover
+            const desdeDia = prompt(`¿Desde qué día quieres mover al siguiente mes?\n\nPor ejemplo:\n- Si cierras el 27, ingresa 28\n- Si cierras el 28, ingresa 29\n- Si cierras el 30, ingresa 31\n\nIngresa el número (entre 16 y ${ultimoDiaMes}):`);
+            
+            if (!desdeDia) return; // Canceló
+            
+            const diaInicio = parseInt(desdeDia);
+            
+            if (isNaN(diaInicio) || diaInicio < 16 || diaInicio > ultimoDiaMes) {
+                alert(`⚠️ Día inválido. Debe ser entre 16 y ${ultimoDiaMes}`);
+                return;
+            }
+
+            // Confirmar acción
+            const diasAMover = ultimoDiaMes - diaInicio + 1;
+            if (!confirm(`Vas a mover ${diasAMover} día(s) (del ${diaInicio} al ${ultimoDiaMes}) al inicio del siguiente mes.\n\n¿Continuar?`)) {
+                return;
+            }
+
+            let registrosMovidos = 0;
+            
+            // Para cada empleado
+            empleados.forEach(emp => {
+                let diaDestino = 1; // Empezar en el día 1 del siguiente mes
+                
+                // Mover cada día desde diaInicio hasta el último día del mes
+                for (let diaOrigen = diaInicio; diaOrigen <= ultimoDiaMes; diaOrigen++) {
+                    const keyOrigen = `${emp.id}-2-${diaOrigen}`; // Siempre de la 2da quincena
+                    const keyDestino = `${emp.id}-1-${diaDestino}`; // A la 1ra quincena del siguiente mes
+                    
+                    if (asistencias[keyOrigen]) {
+                        // Copiar registro al día destino
+                        asistencias[keyDestino] = asistencias[keyOrigen];
+                        // Borrar registro origen
+                        delete asistencias[keyOrigen];
+                        registrosMovidos++;
+                    }
+                    
+                    diaDestino++;
+                }
+            });
+
+            guardarDatos();
+            renderAsistencias();
+            renderResumen();
+            
+            alert(`✅ Se movieron ${registrosMovidos} registros al siguiente mes.\n\nAhora puedes limpiar el mes anterior cuando estés listo.`);
+        }
+
+        // Inicializar al cargar la página
+        init();
+    </script>
+</body>
+</html>
