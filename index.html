@@ -4,6 +4,29 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sistema de Asistencias</title>
+    
+    <!-- Firebase SDK -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getFirestore, collection, doc, setDoc, getDoc, getDocs, deleteDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        
+        const firebaseConfig = {
+            apiKey: "AIzaSyCeu2TJ6jRHfLTlWG84TJ1GQma6MoRcuA0",
+            authDomain: "sistema-asistencias-9eacf.firebaseapp.com",
+            projectId: "sistema-asistencias-9eacf",
+            storageBucket: "sistema-asistencias-9eacf.firebasestorage.app",
+            messagingSenderId: "663369371857",
+            appId: "1:663369371857:web:c263e4922b8810a52735f0"
+        };
+        
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        
+        // Hacer disponible globalmente
+        window.db = db;
+        window.firestore = { collection, doc, setDoc, getDoc, getDocs, deleteDoc };
+    </script>
+    
     <style>
         * {
             margin: 0;
@@ -352,9 +375,47 @@
             font-weight: 600;
             margin-bottom: 15px;
         }
+
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(255, 255, 255, 0.95);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .loading-spinner {
+            width: 50px;
+            height: 50px;
+            border: 5px solid #e5e7eb;
+            border-top-color: #2563eb;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .hidden {
+            display: none;
+        }
     </style>
 </head>
 <body>
+    <!-- Indicador de carga -->
+    <div id="loadingOverlay" class="loading-overlay">
+        <div class="loading-spinner"></div>
+        <p style="color: #6b7280; font-size: 16px;">Cargando datos...</p>
+    </div>
+
     <div class="container">
         <div class="header">
             <h1>📋 Sistema de Asistencias</h1>
@@ -461,13 +522,21 @@
         ];
 
         // Inicializar
-        function init() {
-            cargarDatos();
-            calcularDiaActual();
-            actualizarFecha();
-            renderEmpleados();
-            renderAsistencias();
-            renderResumen();
+        async function init() {
+            try {
+                await cargarDatos();
+                calcularDiaActual();
+                actualizarFecha();
+                renderEmpleados();
+                renderAsistencias();
+                renderResumen();
+                
+                // Ocultar loading
+                document.getElementById('loadingOverlay').classList.add('hidden');
+            } catch (error) {
+                console.error('Error al inicializar:', error);
+                alert('Error al cargar la aplicación. Por favor recarga la página.');
+            }
         }
 
         function calcularDiaActual() {
@@ -498,20 +567,38 @@
             document.getElementById('diaActualBadge').textContent = `Registrando día ${diaActual}`;
         }
 
-        function cargarDatos() {
-            const datosGuardados = localStorage.getItem('asistenciasData');
-            if (datosGuardados) {
-                const datos = JSON.parse(datosGuardados);
-                empleados = datos.empleados || [];
-                asistencias = datos.asistencias || {};
+        async function cargarDatos() {
+            try {
+                // Cargar empleados
+                const empleadosDoc = await window.firestore.getDoc(window.firestore.doc(window.db, 'sistema', 'empleados'));
+                if (empleadosDoc.exists()) {
+                    empleados = empleadosDoc.data().lista || [];
+                }
+
+                // Cargar asistencias
+                const asistenciasDoc = await window.firestore.getDoc(window.firestore.doc(window.db, 'sistema', 'asistencias'));
+                if (asistenciasDoc.exists()) {
+                    asistencias = asistenciasDoc.data() || {};
+                }
+            } catch (error) {
+                console.error('Error cargando datos:', error);
+                alert('Error al cargar datos desde la nube. Por favor recarga la página.');
             }
         }
 
-        function guardarDatos() {
-            localStorage.setItem('asistenciasData', JSON.stringify({
-                empleados,
-                asistencias
-            }));
+        async function guardarDatos() {
+            try {
+                // Guardar empleados
+                await window.firestore.setDoc(window.firestore.doc(window.db, 'sistema', 'empleados'), {
+                    lista: empleados
+                });
+
+                // Guardar asistencias
+                await window.firestore.setDoc(window.firestore.doc(window.db, 'sistema', 'asistencias'), asistencias);
+            } catch (error) {
+                console.error('Error guardando datos:', error);
+                alert('Error al guardar datos en la nube. Intenta nuevamente.');
+            }
         }
 
         function cambiarTab(tab) {
@@ -915,8 +1002,13 @@
             alert(`✅ Se movieron ${registrosMovidos} registros al siguiente mes.\n\nAhora puedes limpiar el mes anterior cuando estés listo.`);
         }
 
-        // Inicializar al cargar la página
-        init();
+        // Esperar a que Firebase esté cargado antes de inicializar
+        window.addEventListener('load', () => {
+            // Dar un pequeño delay para asegurar que Firebase esté completamente cargado
+            setTimeout(() => {
+                init();
+            }, 500);
+        });
     </script>
 </body>
 </html>
