@@ -594,12 +594,12 @@
             <h2 style="margin-bottom: 15px;">Registro del Día</h2>
             <div class="dia-actual-badge" id="diaActualBadge"></div>
 
+            <input type="text" class="search-box" id="searchBox" placeholder="🔍 Buscar empleado..." onkeyup="filtrarEmpleados()" />
+
             <div class="empleado-form">
                 <input type="text" id="nombreEmpleado" placeholder="Nombre del empleado" />
                 <button class="btn btn-primary" onclick="agregarEmpleado()">+ Agregar</button>
             </div>
-
-            <input type="text" class="search-box" id="searchBox" placeholder="🔍 Buscar empleado..." onkeyup="filtrarEmpleados()" />
 
             <ul class="empleados-list" id="empleadosList"></ul>
         </div>
@@ -645,6 +645,8 @@
                     </button>
                 </div>
             </div>
+
+            <input type="text" class="search-box" id="searchBoxResumen" placeholder="🔍 Buscar empleado..." onkeyup="renderResumen()" />
 
             <!-- Lista de empleados colapsable -->
             <div class="resumen-grid" id="resumenGrid"></div>
@@ -1172,6 +1174,8 @@
 
         function renderResumen() {
             const grid = document.getElementById('resumenGrid');
+            const searchBoxResumen = document.getElementById('searchBoxResumen');
+            const filtro = searchBoxResumen ? searchBoxResumen.value.toLowerCase() : '';
 
             if (empleados.length === 0) {
                 grid.innerHTML = `
@@ -1183,9 +1187,25 @@
                 return;
             }
 
+            // Filtrar empleados
+            const empleadosFiltrados = empleados.filter(emp => 
+                emp.nombre.toLowerCase().includes(filtro)
+            );
+
+            if (empleadosFiltrados.length === 0) {
+                grid.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-state-icon">🔍</div>
+                        <p>No se encontraron empleados</p>
+                    </div>
+                `;
+                document.getElementById('totalEmpleados').textContent = '0';
+                return;
+            }
+
             let html = '';
 
-            empleados.forEach(emp => {
+            empleadosFiltrados.forEach(emp => {
                 const { diasNormales, extras, total } = calcularTotales(emp.id);
                 
                 // Obtener iniciales del nombre para el avatar
@@ -1224,7 +1244,7 @@
             });
 
             grid.innerHTML = html;
-            document.getElementById('totalEmpleados').textContent = empleados.length;
+            document.getElementById('totalEmpleados').textContent = empleadosFiltrados.length;
         }
 
         function toggleResumen(empId) {
