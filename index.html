@@ -837,10 +837,22 @@
 
                 html += `
                     <div class="resumen-item">
-                        <div>${emp.nombre}</div>
-                        <div>${diasNormales}</div>
-                        <div>${extras}</div>
-                        <div><strong>${total}</strong></div>
+                        <div class="cell">
+                            <span class="cell-label">Empleado</span>
+                            ${emp.nombre}
+                        </div>
+                        <div class="cell">
+                            <span class="cell-label">Días</span>
+                            ${diasNormales}
+                        </div>
+                        <div class="cell">
+                            <span class="cell-label">Extras</span>
+                            ${extras}
+                        </div>
+                        <div class="cell total">
+                            <span class="cell-label">Total</span>
+                            ${total}
+                        </div>
                     </div>
                 `;
             });
