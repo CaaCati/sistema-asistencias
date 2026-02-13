@@ -276,7 +276,7 @@
 
         .resumen-item {
             display: grid;
-            grid-template-columns: 2fr 1fr 1fr 1fr;
+            grid-template-columns: 2fr 1fr;
             gap: 10px;
             padding: 12px;
             border-bottom: 1px solid #e5e7eb;
@@ -865,9 +865,7 @@
             grid.innerHTML = html;
 
             // Actualizar estadísticas
-            document.getElementById('totalEmpleados').textContent = empleados.length;
-            document.getElementById('totalDiasNormales').textContent = totalDias;
-            document.getElementById('totalExtras').textContent = totalExtrasAcum;
+            document.getElementById('totalEmpleados').textContent = empleados.length;            
         }
 
         function exportarExcel() {
