@@ -276,7 +276,7 @@
 
         .resumen-item {
             display: grid;
-            grid-template-columns: 2fr 1fr;
+            grid-template-columns: 2fr 1fr 1fr 1fr;
             gap: 10px;
             padding: 12px;
             border-bottom: 1px solid #e5e7eb;
@@ -837,8 +837,10 @@
 
                 html += `
                     <div class="resumen-item">
-                        <div><span class="label-mobile">Empleado:</span> ${emp.nombre}</div>
-                        <div><span class="label-mobile">Total:</span> <strong>${total}</strong></div>
+                        <div>${emp.nombre}</div>
+                        <div>${diasNormales}</div>
+                        <div>${extras}</div>
+                        <div><strong>${total}</strong></div>
                     </div>
                 `;
             });
