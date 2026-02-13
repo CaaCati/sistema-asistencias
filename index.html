@@ -272,15 +272,125 @@
 
         .resumen-grid {
             margin-top: 20px;
+            display: grid;
+            gap: 15px;
         }
 
         .resumen-item {
-            display: grid;
-            grid-template-columns: 2fr 1fr 1fr 1fr;
-            gap: 10px;
-            padding: 12px;
-            border-bottom: 1px solid #e5e7eb;
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            transition: all 0.3s ease;
+            border: 1px solid #e5e7eb;
+        }
+
+        .resumen-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.15);
+            border-color: #2563eb;
+        }
+
+        .resumen-header {
+            display: flex;
             align-items: center;
+            gap: 12px;
+            margin-bottom: 16px;
+            padding-bottom: 12px;
+            border-bottom: 2px solid #f3f4f6;
+        }
+
+        .resumen-avatar {
+            width: 48px;
+            height: 48px;
+            background: linear-gradient(135deg, #2563eb 0%, #3b82f6 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 700;
+            font-size: 20px;
+            flex-shrink: 0;
+        }
+
+        .resumen-nombre {
+            font-size: 18px;
+            font-weight: 600;
+            color: #111827;
+            flex-grow: 1;
+        }
+
+        .resumen-stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+        }
+
+        .resumen-stat-box {
+            background: #f9fafb;
+            padding: 12px;
+            border-radius: 8px;
+            text-align: center;
+            transition: all 0.2s;
+        }
+
+        .resumen-stat-box:hover {
+            background: #f3f4f6;
+        }
+
+        .resumen-stat-label {
+            font-size: 11px;
+            text-transform: uppercase;
+            color: #6b7280;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            margin-bottom: 4px;
+        }
+
+        .resumen-stat-value {
+            font-size: 24px;
+            font-weight: 700;
+            color: #111827;
+        }
+
+        .resumen-stat-box.dias .resumen-stat-value {
+            color: #2563eb;
+        }
+
+        .resumen-stat-box.extras .resumen-stat-value {
+            color: #f59e0b;
+        }
+
+        .resumen-stat-box.total {
+            background: linear-gradient(135deg, #2563eb 0%, #3b82f6 100%);
+            color: white;
+        }
+
+        .resumen-stat-box.total .resumen-stat-label {
+            color: rgba(255, 255, 255, 0.9);
+        }
+
+        .resumen-stat-box.total .resumen-stat-value {
+            color: white;
+        }
+
+        @media (max-width: 600px) {
+            .resumen-stats {
+                grid-template-columns: 1fr;
+                gap: 8px;
+            }
+
+            .resumen-stat-box {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                text-align: left;
+            }
+
+            .resumen-stat-label {
+                margin-bottom: 0;
+            }
         }        
 
         .export-section {
@@ -830,28 +940,38 @@
                 return;
             }
 
-            let html = '';   // ✅ ESTA LÍNEA ES LA CLAVE
+            let html = '';
 
             empleados.forEach(emp => {
                 const { diasNormales, extras, total } = calcularTotales(emp.id);
+                
+                // Obtener iniciales del nombre para el avatar
+                const iniciales = emp.nombre
+                    .split(' ')
+                    .map(n => n[0])
+                    .slice(0, 2)
+                    .join('')
+                    .toUpperCase();
 
                 html += `
                     <div class="resumen-item">
-                        <div class="cell">
-                            <span class="cell-label">Empleado</span>
-                            ${emp.nombre}
+                        <div class="resumen-header">
+                            <div class="resumen-avatar">${iniciales}</div>
+                            <div class="resumen-nombre">${emp.nombre}</div>
                         </div>
-                        <div class="cell">
-                            <span class="cell-label">Días</span>
-                            ${diasNormales}
-                        </div>
-                        <div class="cell">
-                            <span class="cell-label">Extras</span>
-                            ${extras}
-                        </div>
-                        <div class="cell total">
-                            <span class="cell-label">Total</span>
-                            ${total}
+                        <div class="resumen-stats">
+                            <div class="resumen-stat-box dias">
+                                <div class="resumen-stat-label">Días</div>
+                                <div class="resumen-stat-value">${diasNormales}</div>
+                            </div>
+                            <div class="resumen-stat-box extras">
+                                <div class="resumen-stat-label">Extras</div>
+                                <div class="resumen-stat-value">${extras}</div>
+                            </div>
+                            <div class="resumen-stat-box total">
+                                <div class="resumen-stat-label">Total</div>
+                                <div class="resumen-stat-value">${total}</div>
+                            </div>
                         </div>
                     </div>
                 `;
