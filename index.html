@@ -895,7 +895,17 @@
                 // Cargar empleados
                 const empleadosDoc = await window.firestore.getDoc(window.firestore.doc(window.db, 'sistema', 'empleados'));
                 if (empleadosDoc.exists()) {
-                    empleados = empleadosDoc.data().lista || [];
+                    const listaGuardada = empleadosDoc.data().lista || [];
+                    // Si hay empleados guardados, usarlos. Si no, mantener los predefinidos
+                    if (listaGuardada.length > 0) {
+                        empleados = listaGuardada;
+                    } else {
+                        // Si Firebase está vacío, guardar la lista predefinida
+                        await guardarDatos();
+                    }
+                } else {
+                    // Si no existe el documento, guardar la lista predefinida
+                    await guardarDatos();
                 }
 
                 // Cargar asistencias
