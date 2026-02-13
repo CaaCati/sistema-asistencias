@@ -819,7 +819,7 @@
 
         function renderResumen() {
             const grid = document.getElementById('resumenGrid');
-            
+
             if (empleados.length === 0) {
                 grid.innerHTML = `
                     <div class="empty-state">
@@ -829,29 +829,22 @@
                 `;
                 return;
             }
-           
-            let totalDias = 0;
-            let totalExtrasAcum = 0;
+
+            let html = '';   // ✅ ESTA LÍNEA ES LA CLAVE
 
             empleados.forEach(emp => {
                 const { diasNormales, extras, total } = calcularTotales(emp.id);
-                totalDias += diasNormales;
-                totalExtrasAcum += extras;
 
                 html += `
                     <div class="resumen-item">
                         <div><span class="label-mobile">Empleado:</span> ${emp.nombre}</div>
-                        <div><span class="label-mobile">Días:</span> ${diasNormales}</div>
-                        <div><span class="label-mobile">Extras:</span> ${extras}</div>
                         <div><span class="label-mobile">Total:</span> <strong>${total}</strong></div>
                     </div>
                 `;
             });
 
             grid.innerHTML = html;
-
-            // Actualizar estadísticas
-            document.getElementById('totalEmpleados').textContent = empleados.length;            
+            document.getElementById('totalEmpleados').textContent = empleados.length;
         }
 
         function exportarExcel() {
